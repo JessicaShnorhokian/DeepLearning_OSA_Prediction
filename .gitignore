@@ -1,0 +1,13 @@
+/.DS_Store
+/.idea
+/.pt_tmp
+/.venv
+/data_exploration
+/data_visualization
+/my-results.xlsx
+/new_results_temp
+/results
+/results_feature_sel_dl
+/results_imb_dl
+/stat_results
+/~$my-results.xlsx
