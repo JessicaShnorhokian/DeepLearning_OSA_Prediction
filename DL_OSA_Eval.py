@@ -135,16 +135,12 @@ def eval_model(model, test_loader):
 
 
 def evaluate(args, model_param, train_loader, test_loader, df_result, fold_num = 1):
-    if args.model == 'lstm':
-        model = MV_LSTM(device=device, n_features=1,seq_length=seq_length, hidden_dim=model_param[0], n_layers=model_param[2], num_class=num_class)
-    if args.model == 'cnn':
-        model = MultivariateCNN(dropout = model_param[0], num_class=num_class)
     if args.model == 'dbn':
         model = DBN(n_visible=seq_length, n_hidden=model_param[0], n_classes=num_class, n_layers=model_param[2]) 
     if args.model == 'gru':
         model = MV_GRU(device=device, n_features=1,seq_length=seq_length, hidden_dim=model_param[0], n_layers=model_param[2], num_class=num_class)
     if args.model == 'gcn':
-        model = MV_GCN(n_features=1,seq_length=seq_length, hidden_dim=model_param[0],  num_class=num_class)
+        model = MV_GCN(n_features=1,seq_length=seq_length, hidden_dim=model_param[0], n_layers=model_param[2], num_class=num_class)
     if args.model == 'rnn':
         model = MV_RNN(device=device, n_features=1, seq_length=seq_length, hidden_dim=model_param[0], n_layers=model_param[2], num_class=num_class)
 

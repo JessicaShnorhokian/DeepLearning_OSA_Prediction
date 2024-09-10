@@ -104,8 +104,6 @@ for train_ids, test_ids in sss.split(x, y):
 
     # Example SHAP plots for the current fold
     try:
-        # For multi-class, we need to choose one class to visualize
-        # Here, we'll visualize the positive class (index 1)
 
         #get all the unique values in the target column
         print(np.unique(y_test))
@@ -151,7 +149,3 @@ for train_ids, test_ids in sss.split(x, y):
 
     fold_idx += 1
 
-# Example SHAP plots (for the last fold, can be customized)
-# shap.summary_plot(shap_values, X_test)
-# shap.summary_plot(shap_values, X_test, plot_type="bar")
-# shap.dependence_plot("FeatureName", shap_values, X_test)  # Uncomment and replace "FeatureName" with your actual feature name

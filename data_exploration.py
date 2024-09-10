@@ -1,14 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[2]:
-
-
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[2]:
-
 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -25,9 +14,6 @@ print("Dataset Overview:")
 print(f"Number of samples: {df.shape[0]}")
 print(f"Number of features: {df.shape[1]}")
 print(f"Number of classes: {df['Severity'].nunique()}")
-
-
-# In[3]:
 
 
 # OSA Severity Classes Distribution
@@ -48,7 +34,6 @@ plt.axis('equal')
 plt.show()
 
 
-# In[4]:
 
 
 numerical_columns = []
@@ -90,8 +75,6 @@ all_value_counts_df = all_value_counts_df[['column_name', 'value', 'count']]
 
 
 
-
-# In[5]:
 
 
 # plot the distribution of numerical features

@@ -26,17 +26,6 @@ git clone https://github.com/your-username/your-repository-name.git
 
 Install all necessary python and R packages and dependencies.
 
-- Python 
-
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-- R 
-
-    ```bash
-    pip install -r requirements.txt
-    ```
 
 ## Running the Project
 
