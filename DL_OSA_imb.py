@@ -49,7 +49,7 @@ df = pd.read_csv(path, index_col=['PatientID'])
 df.drop(df.columns[[0]], axis=1, inplace=True)
 df.head(5)
 
-# I am going to add columns AHI5, AHI15, and AHI30 
+# Add columns AHI5, AHI15, and AHI30 
 df['AHI_5'] = df['Severity'].apply(lambda x: 1 if x >= 1 else 0)
 df['AHI_15'] = df['Severity'].apply(lambda x: 1 if x >= 2 else 0)
 df['AHI_30'] = df['Severity'].apply(lambda x: 1 if x >= 3 else 0)
@@ -181,7 +181,6 @@ def tune_LSTM(args, params, train_loader, test_loader, fold_num=1):
             model = MV_GCN(n_features=1,seq_length=seq_length, hidden_dim=model_param[0], n_layers=model_param[2], num_class=num_class)
         model.to(device)
         optimizer = torch.optim.Adam(model.parameters(), lr=model_param[1])
-        #print(f"Fold {fold_idx} - Unique predictions: {np.unique(out)}")
         model, out, out_label = train_model(args, model, train_loader, test_loader, criterion, optimizer)
         
         print(f"Hyperparameters: {model_param}")

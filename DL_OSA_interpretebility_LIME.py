@@ -10,12 +10,24 @@ from torch.utils.data import DataLoader, TensorDataset
 import os
 import matplotlib.pyplot as plt
 from lime.lime_tabular import LimeTabularExplainer
+import argparse
 
 # Set device
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
+# Define Args 
+parser = argparse.ArgumentParser(description='')
+parser.add_argument('--model', type=str, help='Model type, current support lstm, cnn, rnn')
+parser.add_argument('--target_col', type=str, help='The column of the target label, choose Severity for multi-class, AHI_5 for binary cut-off at 5')
+
+args = parser.parse_args()
+
+
+
 # Define model
-model = 'gru'
-target_col = 'severity'
+model = args.model
+target_col = args.target_col
+
 # Define paths
 path = 'data/OSA_complete_patients.csv'
 model_pkl_path = f'results_imb_dl/{target_col}/SMOTE/{model}/best_model_fold_5.pkl'

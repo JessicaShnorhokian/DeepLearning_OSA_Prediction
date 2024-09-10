@@ -34,7 +34,7 @@ from datetime import datetime
 import argparse
 import itertools
 from pathlib import Path
-from models import MV_LSTM, MultivariateCNN, DBN, MV_GRU, MV_RNN, MV_GCN
+from models import DBN, MV_GRU, MV_RNN, MV_GCN
 import os, pickle
 
 device =  'cuda' if torch.cuda.is_available() else 'cpu'
@@ -57,7 +57,7 @@ df= pd.read_csv(path, index_col = ['PatientID'])
 df.drop(df.columns[[0]], axis=1, inplace=True)
 df.head(5)
 
-# I am going to add columns AHI5, AHI15, and AHI30 
+# Add columns AHI5, AHI15, and AHI30 
 df['AHI_5'] = df['Severity'].apply(lambda x: 1 if x >= 1 else 0)
 df['AHI_15'] = df['Severity'].apply(lambda x: 1 if x >= 2 else 0)
 df['AHI_30'] = df['Severity'].apply(lambda x: 1 if x >= 3 else 0)
@@ -120,8 +120,6 @@ def eval_model(model, test_loader):
         if 'lstm' in args.model:
             model.init_hidden(x_batch.size(0))
         output = model(x_batch)
-        #if epoch % 100 == 0:
-        #    print(output.shape)
         loss = criterion(output, y_batch)
         total_loss += loss
         preds = F.log_softmax(output, dim=1).argmax(dim=1).detach().cpu().numpy()
