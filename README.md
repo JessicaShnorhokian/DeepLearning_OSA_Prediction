@@ -42,7 +42,7 @@ Prepare your config for grid search in folder `config`
 Then run, for example:
 
 ```bash
-python DL_OSA_Eval.py --model DBN --batch_size 256 --epochs 10  --target_col AHI_5
+python DL_OSA.py --model DBN --batch_size 256 --epochs 10  --target_col AHI_5
 ```
 
 

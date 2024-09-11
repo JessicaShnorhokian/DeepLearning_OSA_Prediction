@@ -55,7 +55,7 @@ print(len(categorical_columns))
 # Summarize numerical columns
 df[numerical_columns].describe().to_csv('data_exploration/numerical_columns.csv')
 
-# Initialize a list to store value counts
+
 all_value_counts = []
 
 # Append value counts for each categorical column to the list
@@ -102,8 +102,6 @@ for feature in numerical_columns:
 
     # Calculate median values for each Severity group
     medians = df.groupby(['Severity'])[feature].median()
-
-    # Calculate dynamic y-offset based on IQR or range of the data
     q1 = df.groupby(['Severity'])[feature].quantile(0.25)
     q3 = df.groupby(['Severity'])[feature].quantile(0.75)
     iqr = q3 - q1
@@ -129,7 +127,6 @@ def plot_categorical_data(categorical_vars, title, df):
         return
     
     category_data = df.groupby('Severity')[categorical_vars].mean()
-    #plt.figure(figsize=(12, 6))
     ax = category_data.plot(kind='bar', stacked=True)
     plt.title(f'{title} Across OSA Severity Levels')
     plt.xlabel('OSA Severity')
@@ -144,7 +141,6 @@ def plot_categorical_data(categorical_vars, title, df):
         y = p.get_y() + height / 2
         ax.annotate(f'{height:.2f}', (x, y), ha='center', va='center')
 
-    #plt.tight_layout()
     plt.show()
 
 # Plotting for each category

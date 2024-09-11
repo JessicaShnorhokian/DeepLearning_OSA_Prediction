@@ -30,6 +30,7 @@ from imblearn.metrics import geometric_mean_score
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
+# Define Args
 def parse_arguments():
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('--model', type=str, help='Model type, current support lstm, cnn, rnn')
@@ -43,8 +44,8 @@ def parse_arguments():
 parser = parse_arguments()
 args = parser.parse_args()
 
+# Load dataset
 path = 'data/OSA_complete_patients.csv'
-
 df = pd.read_csv(path, index_col=['PatientID'])
 df.drop(df.columns[[0]], axis=1, inplace=True)
 df.head(5)
@@ -54,23 +55,16 @@ df['AHI_5'] = df['Severity'].apply(lambda x: 1 if x >= 1 else 0)
 df['AHI_15'] = df['Severity'].apply(lambda x: 1 if x >= 2 else 0)
 df['AHI_30'] = df['Severity'].apply(lambda x: 1 if x >= 3 else 0)
 
-print("AHI 5 value counts:", df['AHI_5'].value_counts(), "\n")
-print("AHI 15 value counts:", df['AHI_15'].value_counts(), "\n")
-print("AHI 30 value counts:", df['AHI_30'].value_counts(), "\n")
 
-# Making sure this aligns with the severity column
-print("Severity value counts:", df['Severity'].value_counts())
 seq_length = 49
 # Scaling
 x = preprocessing.MinMaxScaler().fit_transform(df.values[:, :seq_length])
 y = df[args.target_col].values
-
 num_class = len(set(y))
-
-print(np.unique(y))
 model_path = 'results_imb_dl/{}/{}/{}'.format(args.target_col, args.imb ,args.model )
 Path(model_path).mkdir(parents=True, exist_ok=True)
 
+# Resampling
 def apply_resampling(X_train, y_train, technique):
     if technique == 'SMOTE':
         resampler = SMOTE()
@@ -82,25 +76,17 @@ def apply_resampling(X_train, y_train, technique):
         resampler = ADASYN()
     else:
         raise ValueError("Unsupported resampling technique. Choose 'SMOTE' or 'ADASYN'.")
-    
-    
     X_resampled, y_resampled = resampler.fit_resample(X_train, y_train)
-    print(f"Original shape: {X_train.shape}, Resampled shape: {X_resampled.shape}")
-    print(f"Original class distribution: {np.unique(y_train, return_counts=True)}")
-    print(f"Resampled class distribution: {np.unique(y_resampled, return_counts=True)}")
-    
-    print(f"X_resampled dtype: {X_resampled.dtype}")
-    print(f"y_resampled dtype: {y_resampled.dtype}")
-
     return X_resampled, y_resampled
 
+# Get data
 def get_data(x_inp, y_inp):
     train_tensor = TensorDataset(torch.from_numpy(x_inp).float(), torch.from_numpy(y_inp).long())
     train_loader = DataLoader(train_tensor, batch_size=args.batch_size, shuffle=True)
     return train_loader
 
 
-# Train model
+# Evaluate model
 def eval_model(model, test_loader):
     
     model.eval()
@@ -110,8 +96,6 @@ def eval_model(model, test_loader):
     for (inp, target) in test_loader:
         x_batch = inp.float().to(device).unsqueeze(dim=2)
         y_batch = target.long().to(device)
-        if 'lstm' in args.model:
-            model.init_hidden(x_batch.size(0))
         output = model(x_batch)
         loss = criterion(output, y_batch)
         total_loss += loss
@@ -126,6 +110,7 @@ def eval_model(model, test_loader):
     print(f"Sample of true labels: {out_label[:10]}")
     return eval_loss, out, out_label
 
+# Train model
 def train_model(args, model, train_loader, test_loader, criterion, optimizer):
     model.train()
     for epoch in range(args.epochs):
@@ -136,8 +121,6 @@ def train_model(args, model, train_loader, test_loader, criterion, optimizer):
             y_batch = target.long()
             x_batch = x_batch.to(device).unsqueeze(dim=2)
             y_batch = y_batch.to(device)
-            if 'lstm' in args.model:
-                model.init_hidden(x_batch.size(0))
             output = model(x_batch)
             loss = criterion(output, y_batch)
             loss.backward()
@@ -156,13 +139,12 @@ def train_model(args, model, train_loader, test_loader, criterion, optimizer):
         print(f"Prediction distribution: {np.unique(out, return_counts=True)}")
         
         if epoch % args.display == 0:
-            print('epoch : ', epoch, '|train loss : ', train_loss.item(), '|train acc : ', train_acc)
-
-       
+            print('epoch : ', epoch, '|train loss : ', train_loss.item(), '|train acc : ', train_acc)      
     eval_loss, out, out_label = eval_model(model, test_loader)
 
     return model, out, out_label
 
+# Tune model
 def tune_LSTM(args, params, train_loader, test_loader, fold_num=1):
     torch.manual_seed(fold_num)
     np.random.seed(fold_num)
@@ -170,6 +152,8 @@ def tune_LSTM(args, params, train_loader, test_loader, fold_num=1):
     best_result = []
     best_model = []
     best_param = []
+
+    # Train model with different hyperparameters
     for model_param in params:
         if args.model == 'rnn':
             model = MV_RNN(device=device, n_features=1, seq_length=seq_length, hidden_dim=model_param[0], n_layers=model_param[2], num_class=num_class)
@@ -198,6 +182,7 @@ def tune_LSTM(args, params, train_loader, test_loader, fold_num=1):
             'g_mean': geometric_mean_score(out_label, out)
         }
 
+    # Save best parameters
         if result['f1_macro'] > best_f1:
             best_f1 = result['f1_macro']
             best_model = model
@@ -206,18 +191,18 @@ def tune_LSTM(args, params, train_loader, test_loader, fold_num=1):
             best_predictions = out
             best_true_labels = out_label
     
-    predictions_df = pd.DataFrame({
-                'true_labels': best_true_labels,
-                'predicted_labels': best_predictions
-            })
-    predictions_df.to_csv(os.path.join(model_path, f'predictions_fold_{fold_num}.csv'), index=False)
-
+    # Save predictions
+        predictions_df = pd.DataFrame({
+                    'true_labels': best_true_labels,
+                    'predicted_labels': best_predictions
+                })
+        predictions_df.to_csv(os.path.join(model_path, f'predictions_fold_{fold_num}.csv'), index=False)
 
     torch.save(best_model.state_dict(), os.path.join(model_path, 'best_model_fold_{}.pth'.format(fold_num)))
 
+    # Save the best model and best parameters
     with open(os.path.join(model_path, 'best_params_fold_{}.json'.format(fold_num)), 'w') as f:
         json.dump(best_param, f)
-    # Now, let's save this model to a file
     with open(os.path.join(model_path, 'best_model_fold_{}.pkl'.format(fold_num)), 'wb') as file:
         pickle.dump(best_model, file)
 
@@ -230,43 +215,24 @@ with open('config/{}.json'.format(args.model), "r") as f:
 all_perm = []
 for k, v in search_space.items():
     all_perm.append(v)
-print(all_perm)
-
 all_params = list(itertools.product(*all_perm))
-print('all_params', all_params)
-
 start_time = datetime.now()
 criterion = nn.CrossEntropyLoss()
-
 sss = StratifiedShuffleSplit(n_splits=5, test_size=0.2, random_state=0)
 fold_idx = 1
 results = []
 
+# cross-validation
 for train_ids, test_ids in sss.split(x, y):
     print('Fold: ', fold_idx)
     X_train, X_test = x[train_ids], x[test_ids]
     y_train, y_test = y[train_ids], y[test_ids]
-
-    print(f"Fold {fold_idx} - Train set shape: {X_train.shape}, Test set shape: {X_test.shape}")
-    print(f"Fold {fold_idx} - Train set class distribution: {np.unique(y_train, return_counts=True)}")
-    print(f"Fold {fold_idx} - Test set class distribution: {np.unique(y_test, return_counts=True)}")
-
-
-
     if args.imb:
         X_train, y_train = apply_resampling(X_train, y_train, args.imb)
         print(f"Fold {fold_idx} - Resampled train set shape: {X_train.shape}")
         print(f"Fold {fold_idx} - Resampled train set class distribution: {np.unique(y_train, return_counts=True)}")
     else:
         print("Skipping resampling")
-
-    print("First few samples of X_train:")
-    print(X_train[:5])
-    print("First few labels of y_train:")
-    print(y_train[:5])  
-
-    
-
     train_loader, test_loader = get_data(X_train, y_train), get_data(X_test, y_test)
     best_result = tune_LSTM(args, all_params, train_loader, test_loader, fold_num=fold_idx)
     best_result['fold'] = fold_idx
@@ -277,6 +243,8 @@ for train_ids, test_ids in sss.split(x, y):
     fold_idx += 1
 
 results_df = pd.DataFrame(results)
+
+# Save results to CSV
 results_df.to_csv(os.path.join(model_path, 'evaluation_results.csv'), index=False)
 
 print('Total time: ', (datetime.now() - start_time))

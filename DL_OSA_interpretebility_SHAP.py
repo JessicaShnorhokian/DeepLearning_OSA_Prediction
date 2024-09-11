@@ -11,24 +11,17 @@ import os
 import matplotlib.pyplot as plt
 import argparse
 
-
-
-# Set device
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
-
-# Define paths
 
 # Define Args 
 parser = argparse.ArgumentParser(description='')
 parser.add_argument('--model', type=str, help='Model type, current support lstm, cnn, rnn')
 parser.add_argument('--target_col', type=str, help='The column of the target label, choose Severity for multi-class, AHI_5 for binary cut-off at 5')
-
 args = parser.parse_args()
-
-
 model =args.model
 target_col = args.target_col
 
+# Define paths
 path = 'data/OSA_complete_patients.csv'
 model_pkl_path = f'results_imb_dl/{target_col}/SMOTE/{model}/best_model_fold_5.pkl'
 model_path = f'data_visualization/intepretability/Shap/{target_col}/{model}/'
@@ -66,13 +59,10 @@ fold_idx = 1
 results = []
 
 for train_ids, test_ids in sss.split(x, y):
-    print('Fold: ', fold_idx)
+
     X_train, X_test = x[train_ids], x[test_ids]
     y_train, y_test = y[train_ids], y[test_ids]
 
-    print(f"Fold {fold_idx} - Train set shape: {X_train.shape}, Test set shape: {X_test.shape}")
-    print(f"Fold {fold_idx} - Train set class distribution: {np.unique(y_train, return_counts=True)}")
-    print(f"Fold {fold_idx} - Test set class distribution: {np.unique(y_test, return_counts=True)}")
 
     # Convert data to PyTorch Datasets and DataLoader
     test_dataset = TensorDataset(torch.tensor(X_test, dtype=torch.float32), torch.tensor(y_test, dtype=torch.long))
@@ -105,13 +95,9 @@ for train_ids, test_ids in sss.split(x, y):
     # Example SHAP plots for the current fold
     try:
 
-        #get all the unique values in the target column
-        print(np.unique(y_test))
+        # Get all the unique values in the target column
         for i in np.unique(y_test):
-            print(f"Class {i} count: {np.sum(y_test == i)}")
             class_to_explain = i
-
-        
             # Compute the mean absolute SHAP values for the chosen class
             mean_abs_shap = np.abs(shap_values[:, :, class_to_explain]).mean(0)
             print(f"Mean |SHAP value| : {mean_abs_shap}")
@@ -121,7 +107,6 @@ for train_ids, test_ids in sss.split(x, y):
             feature_importance = feature_importance.sort_values('importance', ascending=False)
             feature_names = df.columns[:seq_length].tolist()
             plt.figure(figsize=(12, 10))
-
             shap.summary_plot(
 
                 shap_values[:, :, class_to_explain], 
@@ -131,11 +116,9 @@ for train_ids, test_ids in sss.split(x, y):
                 max_display=10,
                 show=False,
                 color = '#FF6F91'
-
             )
 
             plt.xlabel('Mean |SHAP value|')
-
             plt.title(f'SHAP Summary Plot (Class {class_to_explain}) - {target_col}')
             plt.tight_layout()
             plt.savefig(os.path.join(model_path, f'shap_summary_plot_bar_class_{class_to_explain}.png'))

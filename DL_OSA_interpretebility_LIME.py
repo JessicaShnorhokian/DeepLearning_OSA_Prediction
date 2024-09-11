@@ -19,10 +19,7 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 parser = argparse.ArgumentParser(description='')
 parser.add_argument('--model', type=str, help='Model type, current support lstm, cnn, rnn')
 parser.add_argument('--target_col', type=str, help='The column of the target label, choose Severity for multi-class, AHI_5 for binary cut-off at 5')
-
 args = parser.parse_args()
-
-
 
 # Define model
 model = args.model
@@ -73,6 +70,7 @@ for train_ids, test_ids in sss.split(df[df.columns[:49]].values, df['Severity'].
     test_loader = DataLoader(test_dataset, batch_size=256, shuffle=False)
     X_test_df = pd.DataFrame(X_test, columns=df.columns[:49])
     
+    # Define predict function
     def predict_fn(data):
         if len(data.shape) == 2:
             data = data.reshape(data.shape[0], data.shape[1], 1)
@@ -84,26 +82,22 @@ for train_ids, test_ids in sss.split(df[df.columns[:49]].values, df['Severity'].
             output = best_model(data)
         return torch.softmax(output, dim=1).cpu().numpy()
 
+    # LIME explanation for each fold 
     lime_explainer = LimeTabularExplainer(X_train, mode='classification', training_labels=y_train, feature_names=df.columns[:49].tolist(), discretize_continuous=True)
-    
-    
     random_idx = np.random.randint(0, len(X_test))
     while np.argmax(predict_fn(X_test[random_idx:random_idx+1])) != 3:
         random_idx = np.random.randint(0, len(X_test))
-    print(f"Random index: {random_idx}")
-    print(f"True label: {y_test[random_idx]}")
-    print(f" X_test : {X_test[random_idx]}")
 
     explanation = lime_explainer.explain_instance(X_test[random_idx], predict_fn)
-    
     lime_explanation_dir = os.path.join(model_path)
     Path(lime_explanation_dir).mkdir(parents=True, exist_ok=True)
+
     with open(os.path.join(lime_explanation_dir, f'lime_explanation_fold_{fold_idx}_{model}_{np.argmax(predict_fn(X_test[random_idx]))}.pkl'), 'wb') as f:
         pickle.dump(explanation, f)
     
     explanation_list = explanation.as_list()
-    print(explanation_list)
 
+    # Save explanation as a plot
     with plt.style.context("ggplot"):
         fig = explanation.as_pyplot_figure()
         plt.title(f"LIME explanation for {model} - {target_col} - prediction: {np.argmax(predict_fn(X_test[random_idx]))}", fontsize=9)
