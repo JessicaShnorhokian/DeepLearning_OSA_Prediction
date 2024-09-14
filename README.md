@@ -31,7 +31,7 @@ Install all necessary python and R packages and dependencies.
 
 For all command line arguments , choose the appropriate parameters depending on the task at hand. 
 
-- target_column: Severity, AHI_5 , AHI_15, AHI_30
+- target_col: Severity, AHI_5 , AHI_15, AHI_30
 - model: GCN, RNN, GRU, DBN
 - imb: SMOTE, SMOTETomek, BorderlineSMOTE, ADASYN 
 
