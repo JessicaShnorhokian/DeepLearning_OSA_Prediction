@@ -3,12 +3,11 @@
 
 This project focuses on using artificial neural networks (ANNs) to accurately classify the severity of Obstructive Sleep Apnea (OSA) using readily available data. The models used in this study include Deep Belief Networks (DBNs), Recurrent Neural Networks (RNNs), Gated Recurrent Units (GRUs), and Graph Convolutional Networks (GCNs).
 
-The dataset for this project was pre-processed to include various features like demographic attributes, measurements, comorbidities, symptoms, and questionnaire data. Both binary and multiclass classification tasks are tested. Imbalance handling is performed through advanced resampling techniques like SMOTE, Borderline SMOTE, ADASYN, and SMOTE-Tomek. 
+The dataset for this project was pre-processed to incorporate a range of features, including demographic data, measurements, comorbidities, symptoms, and responses from questionnaires. Both binary and multiclass classification tasks were explored. To address data imbalance, advanced resampling methods such as SMOTE, Borderline SMOTE, ADASYN, and SMOTE-Tomek were applied.
 
-The project uses hyperparameter tuning to optimize model performance, and various performance metrics were used to evaluate effectiveness, including accuracy, precision, recall, F1-score, confusion matrices, precision-recall curves, and AUC-ROC curves.
+Hyperparameter tuning was employed to enhance model performance, with various metrics like accuracy, precision, recall, F1-score, confusion matrices, precision-recall curves, and AUC-ROC curves used to assess effectiveness.
 
-SHAP and LIME libraries were used to analyze feature importance and understand the models' decision-making processes. Additionally, statistical tests such as Chi-square and Kruskal-Wallis tests were performed to validate the significance of the features in relation to OSA severity.
-
+To interpret the models' decision-making, SHAP and LIME were used for feature importance analysis. Additionally, statistical tests like Chi-square and Kruskal-Wallis were conducted to confirm the significance of features related to OSA severity.
 
 ## Installation
 
