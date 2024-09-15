@@ -3,7 +3,7 @@
 
 This project focuses on using artificial neural networks (ANNs) to accurately classify the severity of Obstructive Sleep Apnea (OSA) using readily available data. The models used in this study include Deep Belief Networks (DBNs), Recurrent Neural Networks (RNNs), Gated Recurrent Units (GRUs), and Graph Convolutional Networks (GCNs).
 
-The dataset for this project was pre-processed to include various features such as demographic characteristics, measurements, comorbidities, symptoms, and questionnaire data. Both binary and multiclass classification tasks are tested. Imbalance handling is performed through advanced resampling techniques like SMOTE, Borderline SMOTE, ADASYN, and SMOTE-Tomek. 
+The dataset for this project was pre-processed to include various features like demographic attributes, measurements, comorbidities, symptoms, and questionnaire data. Both binary and multiclass classification tasks are tested. Imbalance handling is performed through advanced resampling techniques like SMOTE, Borderline SMOTE, ADASYN, and SMOTE-Tomek. 
 
 The project uses hyperparameter tuning to optimize model performance, and various performance metrics were used to evaluate effectiveness, including accuracy, precision, recall, F1-score, confusion matrices, precision-recall curves, and AUC-ROC curves.
 
